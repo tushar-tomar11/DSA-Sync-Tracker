@@ -6,6 +6,7 @@ import { Navbar } from './components/Layout/Navbar';
 import { AuthForm } from './components/Auth/AuthForm';
 import { Dashboard } from './pages/Dashboard';
 import { Sheets } from './pages/Sheets';
+import { SheetView } from './pages/SheetView';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -37,6 +38,7 @@ const AppContent: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/sheets" element={<Sheets />} />
+                  <Route path="/sheet/:id" element={<SheetView />} />
                 </Routes>
               </div>
             </PrivateRoute>

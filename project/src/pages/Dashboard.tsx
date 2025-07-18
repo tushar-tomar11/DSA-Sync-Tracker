@@ -20,6 +20,7 @@ export const Dashboard: React.FC = () => {
     topic: '',
     search: '',
   });
+  const [sheetStats, setSheetStats] = useState<any[]>([]);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [exporting, setExporting] = useState(false);
@@ -30,6 +31,27 @@ export const Dashboard: React.FC = () => {
       setNextProblems(unsolved);
     }
   }, [problems]);
+
+  // Fetch per-sheet stats using getSheetProblems
+  useEffect(() => {
+    const fetchStats = async () => {
+      const stats = await Promise.all(
+        sheets.map(async (sheet) => {
+          const sheetProblems = await getSheetProblems(sheet.id);
+          const total = sheetProblems.length;
+          const solved = sheetProblems.filter((p: any) => p.progress?.is_solved).length;
+          return {
+            sheet,
+            total,
+            solved,
+            percent: total > 0 ? Math.round((solved / total) * 100) : 0,
+          };
+        })
+      );
+      setSheetStats(stats);
+    };
+    if (sheets.length > 0) fetchStats();
+  }, [sheets, getSheetProblems]);
 
   // Streak calculation (optional, simple version: consecutive days with solved problems)
   const streak = useMemo(() => {
