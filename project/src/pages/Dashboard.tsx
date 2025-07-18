@@ -85,26 +85,6 @@ export const Dashboard: React.FC = () => {
     );
   }, [problems, filters]);
 
-  // Per-sheet stats
-  const sheetStats = useMemo(() => {
-    return sheets.map(sheet => {
-      const sheetProblems = problems.filter(p => {
-        // For public sheets, match by sheet id in sheet_problems (not available here, so fallback to all problems for now)
-        // For custom sheets, user_id matches
-        // In a real app, fetch sheet_problems for exact mapping
-        return true; // TODO: refine if needed
-      });
-      const total = sheetProblems.length;
-      const solved = sheetProblems.filter(p => p.progress?.is_solved).length;
-      return {
-        sheet,
-        total,
-        solved,
-        percent: total > 0 ? Math.round((solved / total) * 100) : 0,
-      };
-    });
-  }, [sheets, problems]);
-
   // Export to CSV logic
   const handleExportCSV = async () => {
     if (!user) return;
