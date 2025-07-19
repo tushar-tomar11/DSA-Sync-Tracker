@@ -13,9 +13,12 @@ export const useProblems = () => {
 
   useEffect(() => {
     if (user) {
-      fetchSheets();
-      fetchProblems();
-      fetchProgress();
+      setLoading(true);
+      Promise.all([fetchSheets(), fetchProblems(), fetchProgress()]).finally(() => {
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -58,8 +61,6 @@ export const useProblems = () => {
       setProgress(data || []);
     } catch (error) {
       console.error('Error fetching progress:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

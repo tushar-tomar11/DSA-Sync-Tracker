@@ -24,9 +24,15 @@ export const Navbar: React.FC = () => {
   };
 
   const handleSaveUsernames = async () => {
+    if (!user) return;
     setSaving(true);
-    await updateUserProfile({ leetcode_username: leetcode, gfg_username: gfg });
-    setSaving(false);
+    try {
+      await updateUserProfile({ leetcode_username: leetcode, gfg_username: gfg });
+    } catch (error) {
+      console.error('Error saving usernames:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Mock fetch solved problems from LeetCode/GFG
@@ -44,32 +50,39 @@ export const Navbar: React.FC = () => {
   };
 
   const handleSyncProgress = async () => {
+    if (!user) return;
     setSyncing(true);
     setSyncSummary(null);
-    // 1. Fetch solved problems from accounts (mocked)
-    const solved = await fetchSolvedProblemsFromAccounts();
-    // 2. For each, mark as solved in progress
-    let count = 0;
-    for (const prob of solved) {
-      // Find all problems in DB matching by link or name+platform
-      const { data: matches, error } = await supabase
-        .from('problems')
-        .select('id')
-        .or(`link.eq.${prob.link},and(name.eq.${prob.name},platform.eq.${prob.platform})`);
-      if (error) continue;
-      for (const match of matches || []) {
-        await supabase.from('progress').upsert({
-          user_id: user?.id,
-          problem_id: match.id,
-          is_solved: true,
-          timestamp: new Date().toISOString(),
-          notes: 'Synced from account',
-        }, { onConflict: ['user_id', 'problem_id'] });
-        count++;
+    try {
+      // 1. Fetch solved problems from accounts (mocked)
+      const solved = await fetchSolvedProblemsFromAccounts();
+      // 2. For each, mark as solved in progress
+      let count = 0;
+      for (const prob of solved) {
+        // Find all problems in DB matching by link or name+platform
+        const { data: matches, error } = await supabase
+          .from('problems')
+          .select('id')
+          .or(`link.eq.${prob.link},and(name.eq.${prob.name},platform.eq.${prob.platform})`);
+        if (error) continue;
+        for (const match of matches || []) {
+          await supabase.from('progress').upsert({
+            user_id: user.id,
+            problem_id: match.id,
+            is_solved: true,
+            timestamp: new Date().toISOString(),
+            notes: 'Synced from account',
+          }, { onConflict: ['user_id', 'problem_id'] });
+          count++;
+        }
       }
+      setSyncSummary(`${count} problems matched and marked as solved from your profile(s).`);
+    } catch (error) {
+      console.error('Sync error:', error);
+      setSyncSummary('Error syncing progress. Please try again.');
+    } finally {
+      setSyncing(false);
     }
-    setSyncSummary(`${count} problems matched and marked as solved from your profile(s).`);
-    setSyncing(false);
   };
 
   // Keep inputs in sync with profile

@@ -75,12 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUserProfile = async (profile: Partial<UserProfile>) => {
     if (!user) return;
-    const { error } = await supabase
-      .from('users')
-      .update(profile)
-      .eq('id', user.id);
-    if (!error) {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update(profile)
+        .eq('id', user.id);
+      if (error) throw error;
       await fetchUserProfile();
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
     }
   };
 

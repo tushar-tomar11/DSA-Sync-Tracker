@@ -6,6 +6,7 @@ import { Navbar } from './components/Layout/Navbar';
 import { AuthForm } from './components/Auth/AuthForm';
 import { Dashboard } from './pages/Dashboard';
 import { Sheets } from './pages/Sheets';
+import Upload from './pages/Upload';
 import SheetView from './pages/SheetView';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,6 +39,7 @@ const AppContent: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/sheets" element={<Sheets />} />
+                  <Route path="/upload" element={<Upload />} />
                   <Route path="/sheet/:id" element={<SheetView />} />
                 </Routes>
               </div>
